@@ -1,4 +1,5 @@
 import { Hono } from 'hono'
+import { cors } from 'hono/cors'
 import { supabaseAdmin } from '../lib/supabase.js'
 import { SupabaseCategoryRepository } from '../db/SupabaseCategoryRepository.js'
 import { SupabaseTransactionRepository } from '../db/SupabaseTransactionRepository.js'
@@ -12,6 +13,12 @@ const transactionRepo = new SupabaseTransactionRepository(supabaseAdmin)
 const savingsRepo = new SupabaseSavingsRepository(supabaseAdmin)
 
 export const app = new Hono()
+
+app.use('*', cors({
+  origin: process.env.ALLOWED_ORIGIN ?? '*',
+  allowMethods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization'],
+}))
 
 app.get('/api/health', (c) => c.json({ ok: true }))
 
