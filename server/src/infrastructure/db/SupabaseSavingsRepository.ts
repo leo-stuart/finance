@@ -15,7 +15,7 @@ export class SupabaseSavingsRepository implements ISavingsRepository {
     return data
   }
 
-  async create(data: Omit<SavingsGoal, 'id' | 'created_at'>): Promise<SavingsGoal> {
+  async create(data: Omit<SavingsGoal, 'id' | 'created_at' | 'updated_at'>): Promise<SavingsGoal> {
     const { data: row, error } = await this.client
       .from('savings_goals')
       .insert(data)
@@ -25,7 +25,7 @@ export class SupabaseSavingsRepository implements ISavingsRepository {
     return row
   }
 
-  async update(id: string, userId: string, data: Partial<Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'deadline'>>): Promise<SavingsGoal> {
+  async update(id: string, userId: string, data: Partial<Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'previous_amount' | 'deadline' | 'next_update_date'>>): Promise<SavingsGoal> {
     const { data: row, error } = await this.client
       .from('savings_goals')
       .update(data)

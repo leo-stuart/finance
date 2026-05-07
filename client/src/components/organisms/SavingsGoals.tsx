@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Plus } from 'lucide-react'
 import { GoalCard } from '../molecules/GoalCard'
+import { GoalEditModal } from '../molecules/GoalEditModal'
+import { SavingsTotalCard } from '../molecules/SavingsTotalCard'
 import { Button } from '../atoms/Button'
 import { Input } from '../atoms/Input'
 import { FormField } from '../molecules/FormField'
@@ -8,18 +10,19 @@ import type { SavingsGoal } from '../../types/finance'
 
 interface SavingsGoalsProps {
   goals: SavingsGoal[]
-  onAdd: (g: Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'deadline'>) => Promise<{ error: any }>
+  onAdd: (g: Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'deadline' | 'next_update_date'>) => Promise<{ error: any }>
   onDelete: (id: string) => Promise<{ error: any }>
-  onUpdateAmount: (id: string, amount: number) => Promise<{ error: any }>
+  onUpdate: (id: string, data: Partial<Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'previous_amount' | 'deadline' | 'next_update_date'>>) => Promise<{ error: any }>
 }
 
-export function SavingsGoals({ goals, onAdd, onDelete, onUpdateAmount }: SavingsGoalsProps) {
+export function SavingsGoals({ goals, onAdd, onDelete, onUpdate }: SavingsGoalsProps) {
   const [showForm, setShowForm] = useState(false)
   const [name, setName] = useState('')
   const [target, setTarget] = useState('')
   const [current, setCurrent] = useState('')
   const [deadline, setDeadline] = useState('')
   const [saving, setSaving] = useState(false)
+  const [editingGoal, setEditingGoal] = useState<SavingsGoal | null>(null)
 
   const handleAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,6 +34,7 @@ export function SavingsGoals({ goals, onAdd, onDelete, onUpdateAmount }: Savings
       target_amount: targetNum,
       current_amount: parseFloat(current.replace(',', '.')) || 0,
       deadline: deadline || null,
+      next_update_date: null,
     })
     setName('')
     setTarget('')
@@ -85,16 +89,26 @@ export function SavingsGoals({ goals, onAdd, onDelete, onUpdateAmount }: Savings
         </div>
       )}
 
+      {goals.length > 0 && <SavingsTotalCard goals={goals} />}
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {goals.map(goal => (
           <GoalCard
             key={goal.id}
             goal={goal}
             onDelete={async id => { await onDelete(id) }}
-            onUpdateAmount={async (id, amount) => { await onUpdateAmount(id, amount) }}
+            onEdit={goal => setEditingGoal(goal)}
           />
         ))}
       </div>
+
+      {editingGoal && (
+        <GoalEditModal
+          goal={editingGoal}
+          onSave={onUpdate}
+          onClose={() => setEditingGoal(null)}
+        />
+      )}
     </div>
   )
 }

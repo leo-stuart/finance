@@ -59,7 +59,7 @@ export function Dashboard() {
             goals={goals}
             onAdd={addGoal}
             onDelete={removeGoal}
-            onUpdateAmount={async (id, amount) => updateGoal(id, { current_amount: amount })}
+            onUpdate={async (id, data) => updateGoal(id, data)}
           />
         </div>
       )}

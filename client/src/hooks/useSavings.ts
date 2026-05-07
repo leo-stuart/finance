@@ -22,7 +22,7 @@ export function useSavings() {
 
   useEffect(() => { refresh() }, [refresh])
 
-  const add = async (g: Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'deadline'>) => {
+  const add = async (g: Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'deadline' | 'next_update_date'>) => {
     if (DEMO) { alert('Demo: operações de escrita desativadas.'); return { error: null } }
     try {
       await apiFetch('/savings', { method: 'POST', body: JSON.stringify(g) })
@@ -33,7 +33,7 @@ export function useSavings() {
     }
   }
 
-  const update = async (id: string, g: Partial<Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'deadline'>>) => {
+  const update = async (id: string, g: Partial<Pick<SavingsGoal, 'name' | 'target_amount' | 'current_amount' | 'previous_amount' | 'deadline' | 'next_update_date'>>) => {
     if (DEMO) { alert('Demo: operações de escrita desativadas.'); return { error: null } }
     try {
       await apiFetch(`/savings/${id}`, { method: 'PATCH', body: JSON.stringify(g) })

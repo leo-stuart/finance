@@ -7,6 +7,6 @@ export class CreateSavingsGoal {
 
   async execute(userId: string, dto: CreateSavingsGoalDto): Promise<SavingsGoal> {
     const data = CreateSavingsGoalSchema.parse(dto)
-    return this.repo.create({ ...data, user_id: userId, deadline: data.deadline ?? null })
+    return this.repo.create({ ...data, user_id: userId, deadline: data.deadline ?? null, next_update_date: data.next_update_date ?? null, previous_amount: null })
   }
 }

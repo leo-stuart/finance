@@ -74,7 +74,7 @@ export const DEMO_TRANSACTIONS: Transaction[] = [
 ]
 
 export const DEMO_GOALS: SavingsGoal[] = [
-  { id: 'g1', user_id: 'demo', name: 'Viagem Europa',       target_amount: 15000, current_amount: 2300, deadline: '2027-06-01', created_at: '' },
-  { id: 'g2', user_id: 'demo', name: 'Fundo de Emergência', target_amount: 27000, current_amount: 8500, deadline: null,         created_at: '' },
-  { id: 'g3', user_id: 'demo', name: 'Notebook novo',       target_amount: 5000,  current_amount: 1800, deadline: '2026-09-01', created_at: '' },
+  { id: 'g1', user_id: 'demo', name: 'Viagem Europa',       target_amount: 15000, current_amount: 2300, previous_amount: 1800, deadline: '2027-06-01', next_update_date: '2026-06-01', created_at: '2025-06-01T10:00:00Z', updated_at: '2026-04-15T10:00:00Z' },
+  { id: 'g2', user_id: 'demo', name: 'Fundo de Emergência', target_amount: 27000, current_amount: 8500, previous_amount: 7200, deadline: null,         next_update_date: '2026-05-15', created_at: '2024-01-01T10:00:00Z', updated_at: '2026-05-01T10:00:00Z' },
+  { id: 'g3', user_id: 'demo', name: 'Notebook novo',       target_amount: 5000,  current_amount: 1800, previous_amount: null, deadline: '2026-09-01', next_update_date: null,         created_at: '2026-01-01T10:00:00Z', updated_at: '2026-04-28T10:00:00Z' },
 ]

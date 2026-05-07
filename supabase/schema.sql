@@ -27,8 +27,23 @@ create table if not exists savings_goals (
   target_amount decimal(10,2) not null,
   current_amount decimal(10,2) default 0,
   deadline date,
-  created_at timestamptz default now()
+  next_update_date date,
+  previous_amount decimal(10,2),
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
 );
+
+create or replace function update_savings_goals_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+create trigger savings_goals_updated_at
+  before update on savings_goals
+  for each row execute function update_savings_goals_updated_at();
 
 -- Row Level Security
 alter table categories enable row level security;
