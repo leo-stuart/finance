@@ -38,6 +38,38 @@ export interface DayData {
   income: number
   expense: number
   savings: number
+  creditCardInvoice: number
   cumulativeNet: number
   transactions: Transaction[]
+}
+
+export interface CreditCard {
+  id: string
+  user_id: string
+  name: string
+  closing_day: number
+  due_day: number
+  limit_amount: number | null
+  color: string
+  created_at: string
+}
+
+export interface CreditCardCharge {
+  id: string
+  user_id: string
+  credit_card_id: string
+  purchase_date: string
+  amount: number
+  description: string
+  category_id: string | null
+  installments: number
+  created_at: string
+}
+
+export interface InvoiceOverlay {
+  date: string
+  cardId: string
+  cardName: string
+  color: string
+  amount: number
 }

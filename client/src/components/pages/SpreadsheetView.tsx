@@ -5,7 +5,10 @@ import { TransactionModal } from '../organisms/TransactionModal'
 import { Spinner } from '../atoms/Spinner'
 import { useTransactions } from '../../hooks/useTransactions'
 import { useCategories } from '../../hooks/useCategories'
+import { useCreditCards } from '../../hooks/useCreditCards'
+import { useAllCreditCardCharges } from '../../hooks/useCreditCardCharges'
 import { computeStartingBalances, parseTransactionDate, MONTHS_SHORT_PT } from '../../utils/finance'
+import { computeYearInvoices } from '../../utils/creditCards'
 
 export function SpreadsheetView() {
   const currentDate = new Date()
@@ -13,11 +16,18 @@ export function SpreadsheetView() {
   const [month, setMonth] = useState(currentDate.getMonth())
   const { transactions, loading, add, remove } = useTransactions(year)
   const { categories } = useCategories()
+  const { cards } = useCreditCards()
+  const { charges } = useAllCreditCardCharges()
   const [modal, setModal] = useState<{ date: string; type: 'income' | 'expense' | 'savings' } | null>(null)
 
+  const invoiceOverlays = useMemo(
+    () => computeYearInvoices(charges, cards, year),
+    [charges, cards, year],
+  )
+
   const startingBalances = useMemo(
-    () => computeStartingBalances(year, transactions),
-    [year, transactions],
+    () => computeStartingBalances(year, transactions, invoiceOverlays),
+    [year, transactions, invoiceOverlays],
   )
 
   const monthTransactions = useMemo(
@@ -35,8 +45,14 @@ export function SpreadsheetView() {
     for (const t of transactions) {
       counts[parseTransactionDate(t.date).month] = true
     }
+    for (const o of invoiceOverlays) {
+      if (o.date.startsWith(String(year))) {
+        const m = parseInt(o.date.slice(5, 7), 10) - 1
+        if (m >= 0 && m < 12) counts[m] = true
+      }
+    }
     return counts
-  }, [transactions])
+  }, [transactions, invoiceOverlays, year])
 
   return (
     <div className="flex flex-col h-full">
@@ -105,6 +121,7 @@ export function SpreadsheetView() {
             month={month}
             transactions={monthTransactions}
             startingBalance={startingBalances[month]}
+            invoiceOverlays={invoiceOverlays}
             onCellClick={(date, type) => setModal({ date, type })}
           />
         </div>

@@ -1,4 +1,4 @@
-import type { Transaction, DayData } from '../types/finance'
+import type { Transaction, DayData, InvoiceOverlay } from '../types/finance'
 
 export const MONTHS_PT = [
   'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
@@ -36,6 +36,7 @@ export const computeMonthDays = (
   year: number,
   month: number,
   transactions: Transaction[],
+  invoiceOverlays: InvoiceOverlay[] = [],
 ): DayData[] => {
   const daysInMonth = getDaysInMonth(year, month)
   const byDay = new Map<number, Transaction[]>()
@@ -46,6 +47,15 @@ export const computeMonthDays = (
     byDay.get(day)!.push(t)
   }
 
+  // Build invoice totals by day number for this month
+  const invoiceByDay = new Map<number, number>()
+  const m = String(month + 1).padStart(2, '0')
+  for (const overlay of invoiceOverlays) {
+    if (!overlay.date.startsWith(`${year}-${m}-`)) continue
+    const day = parseInt(overlay.date.slice(8), 10)
+    invoiceByDay.set(day, (invoiceByDay.get(day) ?? 0) + overlay.amount)
+  }
+
   let cumulativeNet = 0
   return Array.from({ length: daysInMonth }, (_, i) => {
     const day = i + 1
@@ -53,14 +63,16 @@ export const computeMonthDays = (
     const income = dayTxns.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
     const expense = dayTxns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
     const savings = dayTxns.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0)
-    cumulativeNet += income - expense - savings
-    return { day, income, expense, savings, cumulativeNet, transactions: dayTxns }
+    const creditCardInvoice = invoiceByDay.get(day) ?? 0
+    cumulativeNet += income - expense - savings - creditCardInvoice
+    return { day, income, expense, savings, creditCardInvoice, cumulativeNet, transactions: dayTxns }
   })
 }
 
 export const computeStartingBalances = (
   year: number,
   allTransactions: Transaction[],
+  invoiceOverlays: InvoiceOverlay[] = [],
 ): number[] => {
   const balances = new Array(12).fill(0)
   let running = 0
@@ -73,7 +85,11 @@ export const computeStartingBalances = (
     const income = monthTxns.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
     const expense = monthTxns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
     const savings = monthTxns.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0)
-    running += income - expense - savings
+    const mStr = String(m + 1).padStart(2, '0')
+    const creditCard = invoiceOverlays
+      .filter(o => o.date.startsWith(`${year}-${mStr}-`))
+      .reduce((s, o) => s + o.amount, 0)
+    running += income - expense - savings - creditCard
   }
   return balances
 }

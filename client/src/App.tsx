@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Auth } from './components/pages/Auth'
 import { SpreadsheetView } from './components/pages/SpreadsheetView'
 import { Dashboard } from './components/pages/Dashboard'
+import { CreditCardsPage } from './components/pages/CreditCardsPage'
 import { AppLayout } from './components/templates/AppLayout'
 
 export default function App() {
@@ -17,6 +18,11 @@ export default function App() {
         <Route path="/dashboard" element={
           <AppLayout>
             <Dashboard />
+          </AppLayout>
+        } />
+        <Route path="/cartoes" element={
+          <AppLayout>
+            <CreditCardsPage />
           </AppLayout>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />

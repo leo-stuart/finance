@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom'
-import { LayoutGrid, BarChart2, Tag, LogOut } from 'lucide-react'
+import { LayoutGrid, BarChart2, Tag, LogOut, CreditCard } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 interface SidebarProps {
@@ -11,6 +11,7 @@ interface SidebarProps {
 const navItems = [
   { to: '/', icon: LayoutGrid, label: 'Planilha', end: true },
   { to: '/dashboard', icon: BarChart2, label: 'Dashboard', end: false },
+  { to: '/cartoes', icon: CreditCard, label: 'Cartões', end: false },
 ]
 
 export function Sidebar({ user, onSignOut, onOpenCategories }: SidebarProps) {

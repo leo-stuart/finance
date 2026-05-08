@@ -2,7 +2,7 @@ import { useMemo } from 'react'
 import { TransactionRow } from '../molecules/TransactionRow'
 import { MonthSummary } from './MonthSummary'
 import { computeMonthDays, MONTHS_PT, formatBRL } from '../../utils/finance'
-import type { Transaction } from '../../types/finance'
+import type { Transaction, InvoiceOverlay } from '../../types/finance'
 
 export const COL_WIDTHS = '52px 1fr 1fr 1fr 120px 140px'
 
@@ -11,19 +11,24 @@ interface MonthColumnProps {
   month: number
   transactions: Transaction[]
   startingBalance: number
+  invoiceOverlays?: InvoiceOverlay[]
   onCellClick: (date: string, type: 'income' | 'expense' | 'savings') => void
 }
 
-export function MonthColumn({ year, month, transactions, startingBalance, onCellClick }: MonthColumnProps) {
+export function MonthColumn({ year, month, transactions, startingBalance, invoiceOverlays = [], onCellClick }: MonthColumnProps) {
   const today = new Date()
   const isCurrentMonth = today.getFullYear() === year && today.getMonth() === month
 
-  const days = useMemo(() => computeMonthDays(year, month, transactions), [year, month, transactions])
+  const days = useMemo(
+    () => computeMonthDays(year, month, transactions, invoiceOverlays),
+    [year, month, transactions, invoiceOverlays],
+  )
 
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
   const totalSavings = transactions.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0)
-  const endingBalance = startingBalance + totalIncome - totalExpense - totalSavings
+  const totalCreditCard = days.reduce((s, d) => s + d.creditCardInvoice, 0)
+  const endingBalance = startingBalance + totalIncome - totalExpense - totalSavings - totalCreditCard
 
   const handleCellClick = (day: number, type: 'income' | 'expense' | 'savings') => {
     const m = String(month + 1).padStart(2, '0')
@@ -71,20 +76,27 @@ export function MonthColumn({ year, month, transactions, startingBalance, onCell
       </div>
 
       {/* Day rows */}
-      {days.map(dayData => (
-        <TransactionRow
-          key={dayData.day}
-          data={dayData}
-          monthStartBalance={startingBalance}
-          isToday={isCurrentMonth && today.getDate() === dayData.day}
-          onCellClick={handleCellClick}
-        />
-      ))}
+      {days.map(dayData => {
+        const m = String(month + 1).padStart(2, '0')
+        const d = String(dayData.day).padStart(2, '0')
+        const dateStr = `${year}-${m}-${d}`
+        const dayInvoices = invoiceOverlays.filter(o => o.date === dateStr)
+        return (
+          <TransactionRow
+            key={dayData.day}
+            data={dayData}
+            monthStartBalance={startingBalance}
+            isToday={isCurrentMonth && today.getDate() === dayData.day}
+            invoices={dayInvoices}
+            onCellClick={handleCellClick}
+          />
+        )
+      })}
 
       {/* Summary */}
       <MonthSummary
         totalIncome={totalIncome}
-        totalExpense={totalExpense}
+        totalExpense={totalExpense + totalCreditCard}
         totalSavings={totalSavings}
         startingBalance={startingBalance}
         endingBalance={endingBalance}

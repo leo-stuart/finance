@@ -1,18 +1,19 @@
 import { Plus } from 'lucide-react'
 import { formatBRL } from '../../utils/finance'
 import { COL_WIDTHS } from '../organisms/MonthColumn'
-import type { DayData } from '../../types/finance'
+import type { DayData, InvoiceOverlay } from '../../types/finance'
 
 interface TransactionRowProps {
   data: DayData
   monthStartBalance: number
   isToday: boolean
+  invoices?: InvoiceOverlay[]
   onCellClick: (day: number, type: 'income' | 'expense' | 'savings') => void
 }
 
-export function TransactionRow({ data, monthStartBalance, isToday, onCellClick }: TransactionRowProps) {
-  const { day, income, expense, savings, cumulativeNet } = data
-  const hasActivity = income > 0 || expense > 0 || savings > 0
+export function TransactionRow({ data, monthStartBalance, isToday, invoices = [], onCellClick }: TransactionRowProps) {
+  const { day, income, expense, savings, creditCardInvoice, cumulativeNet } = data
+  const hasActivity = income > 0 || expense > 0 || savings > 0 || creditCardInvoice > 0
   const absoluteBalance = monthStartBalance + cumulativeNet
 
   const py = hasActivity ? 'py-3' : 'py-1.5'
@@ -60,22 +61,32 @@ export function TransactionRow({ data, monthStartBalance, isToday, onCellClick }
 
       {/* Expense */}
       <div
-        className={`px-5 ${py} flex items-center justify-end cursor-pointer hover:bg-[rgba(208,50,56,0.06)] transition-colors`}
+        className={`px-5 ${py} flex items-center justify-end gap-1.5 cursor-pointer hover:bg-[rgba(208,50,56,0.06)] transition-colors`}
         onClick={() => onCellClick(day, 'expense')}
         title="Adicionar saída"
       >
+        {creditCardInvoice > 0 && invoices.map(inv => (
+          <span
+            key={inv.cardId}
+            className="num font-semibold text-xs px-1.5 py-0.5 rounded-md"
+            style={{ backgroundColor: `${inv.color}22`, color: inv.color === '#9fe870' ? '#163300' : inv.color }}
+            title={`${inv.cardName}: ${formatBRL(inv.amount)}`}
+          >
+            {formatBRL(inv.amount)}
+          </span>
+        ))}
         {expense > 0 ? (
           <span className="num font-semibold text-sm">
             <span className="bg-[rgba(208,50,56,0.1)] text-wise-danger px-2 py-0.5 rounded-md">
               {formatBRL(expense)}
             </span>
           </span>
-        ) : (
+        ) : creditCardInvoice === 0 ? (
           <Plus
             size={13}
             className="text-wise-light-surface opacity-0 group-hover:opacity-60 transition-opacity"
           />
-        )}
+        ) : null}
       </div>
 
       {/* Savings */}
