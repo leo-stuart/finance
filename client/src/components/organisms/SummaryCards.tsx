@@ -7,10 +7,19 @@ interface SummaryCardsProps {
 }
 
 export function SummaryCards({ transactions }: SummaryCardsProps) {
+  const now = new Date()
+  now.setHours(23, 59, 59, 999)
+  const toDate = transactions.filter(t => {
+    const [y, m, d] = t.date.split('-').map(Number)
+    return new Date(y, m - 1, d) <= now
+  })
+
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
   const totalSavings = transactions.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0)
-  const balance = totalIncome - totalExpense - totalSavings
+  const balance = toDate.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
+    - toDate.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+    - toDate.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0)
   const savingsRate = totalIncome > 0 ? ((totalSavings / totalIncome) * 100) : 0
 
   return (

@@ -40,14 +40,14 @@ export function MonthSummary({ totalIncome, totalExpense, totalSavings, endingBa
 
       <div className="px-5 py-4">
         <div className="text-[10px] font-bold text-wise-warm-dark uppercase tracking-wider mb-1">Líquido</div>
-        <div className={`num font-semibold ${net >= 0 ? 'text-wise-positive' : 'text-wise-danger'}`}>
+        <div className={`num font-semibold whitespace-nowrap ${net >= 0 ? 'text-wise-positive' : 'text-wise-danger'}`}>
           {formatBRL(net)}
         </div>
       </div>
 
       <div className="px-5 py-4">
         <div className="text-[10px] font-bold text-wise-warm-dark uppercase tracking-wider mb-1">Saldo Final</div>
-        <div className={`num font-semibold ${endingBalance >= 0 ? 'text-wise-black' : 'text-wise-danger'}`}>
+        <div className={`num font-semibold whitespace-nowrap ${endingBalance >= 0 ? 'text-wise-black' : 'text-wise-danger'}`}>
           {formatBRL(endingBalance)}
         </div>
       </div>

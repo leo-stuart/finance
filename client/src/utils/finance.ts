@@ -64,8 +64,9 @@ export const computeMonthDays = (
     const expense = dayTxns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
     const savings = dayTxns.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0)
     const creditCardInvoice = invoiceByDay.get(day) ?? 0
-    cumulativeNet += income - expense - savings - creditCardInvoice
-    return { day, income, expense, savings, creditCardInvoice, cumulativeNet, transactions: dayTxns }
+    const dailyNet = income - expense - savings - creditCardInvoice
+    cumulativeNet += dailyNet
+    return { day, income, expense, savings, creditCardInvoice, dailyNet, cumulativeNet, transactions: dayTxns }
   })
 }
 

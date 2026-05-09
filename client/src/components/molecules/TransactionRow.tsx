@@ -12,7 +12,7 @@ interface TransactionRowProps {
 }
 
 export function TransactionRow({ data, monthStartBalance, isToday, invoices = [], onCellClick }: TransactionRowProps) {
-  const { day, income, expense, savings, creditCardInvoice, cumulativeNet } = data
+  const { day, income, expense, savings, creditCardInvoice, dailyNet, cumulativeNet } = data
   const hasActivity = income > 0 || expense > 0 || savings > 0 || creditCardInvoice > 0
   const absoluteBalance = monthStartBalance + cumulativeNet
 
@@ -107,24 +107,24 @@ export function TransactionRow({ data, monthStartBalance, isToday, invoices = []
         )}
       </div>
 
-      {/* Cumulative net (Diário) — only show on rows with activity */}
+      {/* Daily net (Diário) — only show on rows with activity */}
       <div className={`px-5 ${py} flex items-center justify-end`}>
         {hasActivity && (
           <span
-            className={`num text-sm ${
-              cumulativeNet > 0 ? 'text-wise-positive' :
-              cumulativeNet < 0 ? 'text-wise-danger' :
+            className={`num text-sm whitespace-nowrap ${
+              dailyNet > 0 ? 'text-wise-positive' :
+              dailyNet < 0 ? 'text-wise-danger' :
               'text-wise-gray'
             }`}
           >
-            {formatBRL(cumulativeNet)}
+            {formatBRL(dailyNet)}
           </span>
         )}
       </div>
 
       {/* Absolute balance (Saldo) */}
       <div className={`px-5 ${py} flex items-center justify-end`}>
-        {(hasActivity || absoluteBalance !== monthStartBalance) && (
+        {absoluteBalance !== 0 && (
           <span
             className={`num font-semibold text-sm ${
               absoluteBalance > 0 ? 'text-wise-black' :

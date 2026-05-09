@@ -42,8 +42,8 @@ export function CreditCardsPage() {
     <div className="flex h-full">
       {/* Card list panel */}
       <div className="w-72 shrink-0 border-r border-wise-light-surface flex flex-col">
-        <div className="px-6 py-4 border-b border-wise-light-surface flex items-center justify-between">
-          <h1 className="font-black text-wise-black" style={{ fontSize: '24px', lineHeight: '0.9' }}>Cartões</h1>
+        <div className="px-6 py-4 border-b border-wise-light-surface flex items-center justify-between bg-white sticky top-0 z-10 shadow-[0_1px_0_rgba(14,15,12,0.06)]">
+          <h1 className="font-black text-wise-black" style={{ fontSize: '26px', lineHeight: '0.85' }}>Cartões</h1>
           <Button size="sm" onClick={() => { setEditCard(undefined); setShowCardModal(true) }}>
             <Plus size={14} />
             Novo
@@ -132,7 +132,7 @@ function CardTile({ card, selected, onClick, onEdit, onDelete }: {
   return (
     <div
       onClick={onClick}
-      className={`rounded-[16px] p-3 cursor-pointer transition-all ${selected ? 'bg-wise-black text-white shadow-ring' : 'hover:bg-wise-bg bg-white border border-wise-light-surface'}`}
+      className={`group rounded-[16px] p-3 cursor-pointer transition-all ${selected ? 'bg-wise-black text-white shadow-ring' : 'hover:bg-wise-bg bg-white border border-wise-light-surface'}`}
     >
       <div className="flex items-center gap-2 mb-1">
         <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: card.color }} />
@@ -197,12 +197,12 @@ function CardDetail({ card, charges, loading, categories, onAddCharge, onEditCha
   return (
     <div className="flex flex-col h-full">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-wise-light-surface">
+      <div className="px-6 py-4 border-b border-wise-light-surface bg-white sticky top-0 z-10 shadow-[0_1px_0_rgba(14,15,12,0.06)]">
         <div className="flex items-center justify-between mb-3">
           <div>
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full" style={{ backgroundColor: card.color }} />
-              <h2 className="font-black text-wise-black" style={{ fontSize: '22px', lineHeight: '0.9' }}>{card.name}</h2>
+              <h2 className="font-black text-wise-black" style={{ fontSize: '24px', lineHeight: '0.85' }}>{card.name}</h2>
             </div>
             <p className="text-xs text-wise-gray mt-1">Fecha dia {card.closing_day} · Vence dia {card.due_day}</p>
           </div>
@@ -223,10 +223,16 @@ function CardDetail({ card, charges, loading, categories, onAddCharge, onEditCha
             <p className="num font-semibold text-wise-black text-sm">{formatDate(nextDue)}</p>
           </div>
           {card.limit_amount && (
-            <div>
-              <p className="text-xs text-wise-gray">Limite</p>
-              <p className="num font-semibold text-wise-black text-sm">{formatBRL(card.limit_amount)}</p>
-            </div>
+            <>
+              <div>
+                <p className="text-xs text-wise-gray">Limite</p>
+                <p className="num font-semibold text-wise-black text-sm">{formatBRL(card.limit_amount)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-wise-gray">Disponível</p>
+                <p className="num font-semibold text-wise-black text-sm">{formatBRL(card.limit_amount - invoiceTotal)}</p>
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -237,7 +243,7 @@ function CardDetail({ card, charges, loading, categories, onAddCharge, onEditCha
           <button
             key={key}
             onClick={() => setTab(key)}
-            className={`px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all ${tab === key ? 'bg-wise-black text-white' : 'bg-wise-light-surface text-wise-warm-dark hover:bg-wise-mint'}`}
+            className={`px-3.5 py-1.5 rounded-full text-sm font-semibold transition-all active:scale-95 ${tab === key ? 'bg-wise-black text-white' : 'bg-wise-light-surface text-wise-warm-dark hover:bg-wise-mint'}`}
           >
             {label}
           </button>

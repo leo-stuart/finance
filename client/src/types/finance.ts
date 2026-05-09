@@ -39,6 +39,7 @@ export interface DayData {
   expense: number
   savings: number
   creditCardInvoice: number
+  dailyNet: number
   cumulativeNet: number
   transactions: Transaction[]
 }
