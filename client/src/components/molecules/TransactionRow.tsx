@@ -1,6 +1,5 @@
 import { Plus } from 'lucide-react'
 import { formatBRL } from '../../utils/finance'
-import { COL_WIDTHS } from '../organisms/MonthColumn'
 import type { DayData, InvoiceOverlay } from '../../types/finance'
 
 interface TransactionRowProps {
@@ -21,11 +20,10 @@ export function TransactionRow({ data, monthStartBalance, isToday, invoices = []
   return (
     <div
       className={`
-        grid border-b border-wise-light-surface/50 group
+        hidden md:grid spreadsheet-grid border-b border-wise-light-surface/50 group
         ${isToday ? 'bg-[rgba(159,232,112,0.05)]' : 'hover:bg-wise-bg/80'}
         transition-colors duration-100
       `}
-      style={{ gridTemplateColumns: COL_WIDTHS }}
     >
       {/* Day */}
       <div className={`flex items-center justify-center ${py}`}>
@@ -45,7 +43,7 @@ export function TransactionRow({ data, monthStartBalance, isToday, invoices = []
 
       {/* Income */}
       <div
-        className={`px-5 ${py} flex items-center justify-end cursor-pointer hover:bg-wise-mint/40 transition-colors`}
+        className={`px-3 md:px-5 ${py} flex items-center justify-end cursor-pointer hover:bg-wise-mint/40 transition-colors`}
         onClick={() => onCellClick(day, 'income')}
         title="Adicionar entrada"
       >
@@ -61,7 +59,7 @@ export function TransactionRow({ data, monthStartBalance, isToday, invoices = []
 
       {/* Expense */}
       <div
-        className={`px-5 ${py} flex items-center justify-end gap-1.5 cursor-pointer hover:bg-[rgba(208,50,56,0.06)] transition-colors`}
+        className={`px-3 md:px-5 ${py} flex items-center justify-end gap-1.5 cursor-pointer hover:bg-[rgba(208,50,56,0.06)] transition-colors`}
         onClick={() => onCellClick(day, 'expense')}
         title="Adicionar saída"
       >
@@ -89,9 +87,9 @@ export function TransactionRow({ data, monthStartBalance, isToday, invoices = []
         ) : null}
       </div>
 
-      {/* Savings */}
+      {/* Savings — hidden on mobile */}
       <div
-        className={`px-5 ${py} flex items-center justify-end cursor-pointer hover:bg-[rgba(3,105,161,0.06)] transition-colors`}
+        className={`hidden md:flex px-5 ${py} items-center justify-end cursor-pointer hover:bg-[rgba(3,105,161,0.06)] transition-colors`}
         onClick={() => onCellClick(day, 'savings')}
         title="Adicionar poupança"
       >
@@ -107,8 +105,8 @@ export function TransactionRow({ data, monthStartBalance, isToday, invoices = []
         )}
       </div>
 
-      {/* Daily net (Diário) — only show on rows with activity */}
-      <div className={`px-5 ${py} flex items-center justify-end`}>
+      {/* Daily net (Diário) — hidden on mobile */}
+      <div className={`hidden md:flex px-5 ${py} items-center justify-end`}>
         {hasActivity && (
           <span
             className={`num text-sm whitespace-nowrap ${
@@ -123,7 +121,7 @@ export function TransactionRow({ data, monthStartBalance, isToday, invoices = []
       </div>
 
       {/* Absolute balance (Saldo) */}
-      <div className={`px-5 ${py} flex items-center justify-end ${
+      <div className={`px-3 md:px-5 ${py} flex items-center justify-end ${
         absoluteBalance < 0    ? 'bg-[rgba(208,50,56,0.13)]' :
         absoluteBalance < 500  ? 'bg-[rgba(134,134,133,0.09)]' :
         absoluteBalance < 1000 ? 'bg-[#e2f6d5]' :

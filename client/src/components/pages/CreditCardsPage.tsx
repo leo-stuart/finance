@@ -19,6 +19,7 @@ export function CreditCardsPage() {
   const [selectedCardId, setSelectedCardId] = useState<string | null>(null)
   const [showChargeModal, setShowChargeModal] = useState(false)
   const [editCharge, setEditCharge] = useState<CreditCardCharge | undefined>()
+  const [mobilePanel, setMobilePanel] = useState<'list' | 'detail'>('list')
 
   const selectedCard = cards.find(c => c.id === selectedCardId) ?? null
 
@@ -41,7 +42,7 @@ export function CreditCardsPage() {
   return (
     <div className="flex h-full">
       {/* Card list panel */}
-      <div className="w-72 shrink-0 border-r border-wise-light-surface flex flex-col">
+      <div className={`${mobilePanel === 'detail' ? 'hidden' : 'flex'} md:flex flex-col w-full md:w-72 md:shrink-0 border-r border-wise-light-surface`}>
         <div className="px-6 py-4 border-b border-wise-light-surface flex items-center justify-between bg-white sticky top-0 z-10 shadow-[0_1px_0_rgba(14,15,12,0.06)]">
           <h1 className="font-black text-wise-black" style={{ fontSize: '26px', lineHeight: '0.85' }}>Cartões</h1>
           <Button size="sm" onClick={() => { setEditCard(undefined); setShowCardModal(true) }}>
@@ -66,7 +67,11 @@ export function CreditCardsPage() {
               card={card}
               charges={[]}
               selected={selectedCardId === card.id}
-              onClick={() => setSelectedCardId(selectedCardId === card.id ? null : card.id)}
+              onClick={() => {
+                const newId = selectedCardId === card.id ? null : card.id
+                setSelectedCardId(newId)
+                if (newId) setMobilePanel('detail')
+              }}
               onEdit={() => { setEditCard(card); setShowCardModal(true) }}
               onDelete={() => handleDeleteCard(card)}
             />
@@ -75,7 +80,7 @@ export function CreditCardsPage() {
       </div>
 
       {/* Card detail panel */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className={`${mobilePanel === 'list' ? 'hidden' : 'flex'} md:flex flex-1 flex-col overflow-hidden`}>
         {!selectedCard ? (
           <div className="flex-1 flex items-center justify-center text-wise-gray text-sm">
             Selecione um cartão para ver os lançamentos
@@ -89,6 +94,7 @@ export function CreditCardsPage() {
             onAddCharge={() => { setEditCharge(undefined); setShowChargeModal(true) }}
             onEditCharge={(c) => { setEditCharge(c); setShowChargeModal(true) }}
             onDeleteCharge={removeCharge}
+            onBack={() => setMobilePanel('list')}
           />
         )}
       </div>
@@ -159,7 +165,7 @@ function CardTile({ card, selected, onClick, onEdit, onDelete }: {
   )
 }
 
-function CardDetail({ card, charges, loading, categories, onAddCharge, onEditCharge, onDeleteCharge }: {
+function CardDetail({ card, charges, loading, categories, onAddCharge, onEditCharge, onDeleteCharge, onBack }: {
   card: CreditCard
   charges: CreditCardCharge[]
   loading: boolean
@@ -167,6 +173,7 @@ function CardDetail({ card, charges, loading, categories, onAddCharge, onEditCha
   onAddCharge: () => void
   onEditCharge: (c: CreditCardCharge) => void
   onDeleteCharge: (id: string) => Promise<{ error: any }>
+  onBack?: () => void
 }) {
   const [tab, setTab] = useState<'current' | 'all'>('current')
   const nextDue = getCardNextDueDate(card)
@@ -198,6 +205,14 @@ function CardDetail({ card, charges, loading, categories, onAddCharge, onEditCha
     <div className="flex flex-col h-full">
       {/* Header */}
       <div className="px-6 py-4 border-b border-wise-light-surface bg-white sticky top-0 z-10 shadow-[0_1px_0_rgba(14,15,12,0.06)]">
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="md:hidden flex items-center gap-1 text-sm text-wise-gray mb-3 hover:text-wise-black transition-colors"
+          >
+            <ChevronLeft size={16} /> Cartões
+          </button>
+        )}
         <div className="flex items-center justify-between mb-3">
           <div>
             <div className="flex items-center gap-2">

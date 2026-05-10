@@ -34,6 +34,10 @@
 }
 
 @layer components {
+  .spreadsheet-grid {
+    grid-template-columns: 52px 1fr 1fr 1fr 120px 140px;
+  }
+
   .num {
     font-family: 'IBM Plex Mono', monospace;
   }

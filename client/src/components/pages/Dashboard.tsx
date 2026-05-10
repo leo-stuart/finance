@@ -52,7 +52,7 @@ export function Dashboard() {
           <Spinner size="lg" />
         </div>
       ) : (
-        <div className="p-6 flex flex-col gap-8">
+        <div className="p-3 sm:p-6 flex flex-col gap-6 sm:gap-8">
           <SummaryCards transactions={transactions} invoiceOverlays={invoiceOverlays} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

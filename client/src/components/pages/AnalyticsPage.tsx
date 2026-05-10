@@ -152,7 +152,7 @@ export function AnalyticsPage() {
           <Spinner size="lg" />
         </div>
       ) : (
-        <div className="p-6 flex flex-col gap-6">
+        <div className="p-3 sm:p-6 flex flex-col gap-6">
           <SummaryCards transactions={transactions} invoiceOverlays={invoiceOverlays} />
 
           {/* Net balance + savings rate */}

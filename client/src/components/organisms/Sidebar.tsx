@@ -6,6 +6,7 @@ interface SidebarProps {
   user: User
   onSignOut: () => void
   onOpenCategories: () => void
+  onClose?: () => void
 }
 
 const navItems = [
@@ -15,7 +16,7 @@ const navItems = [
   { to: '/cartoes', icon: CreditCard, label: 'Cartões', end: false },
 ]
 
-export function Sidebar({ user, onSignOut, onOpenCategories }: SidebarProps) {
+export function Sidebar({ user, onSignOut, onOpenCategories, onClose }: SidebarProps) {
   return (
     <aside className="w-56 shrink-0 h-screen sticky top-0 flex flex-col border-r border-wise-light-surface bg-white">
       <div className="px-5 py-6 border-b border-wise-light-surface">
@@ -36,6 +37,7 @@ export function Sidebar({ user, onSignOut, onOpenCategories }: SidebarProps) {
             key={to}
             to={to}
             end={end}
+            onClick={onClose}
             className={({ isActive }) =>
               `flex items-center gap-3 px-3 py-2.5 rounded-[16px] text-sm font-semibold transition-colors ${
                 isActive
@@ -50,7 +52,7 @@ export function Sidebar({ user, onSignOut, onOpenCategories }: SidebarProps) {
         ))}
 
         <button
-          onClick={onOpenCategories}
+          onClick={() => { onOpenCategories(); onClose?.() }}
           className="flex items-center gap-3 px-3 py-2.5 rounded-[16px] text-sm font-semibold text-wise-warm-dark hover:bg-[rgba(211,242,192,0.4)] transition-colors text-left w-full"
         >
           <Tag size={16} />
