@@ -123,15 +123,19 @@ export function TransactionRow({ data, monthStartBalance, isToday, invoices = []
       </div>
 
       {/* Absolute balance (Saldo) */}
-      <div className={`px-5 ${py} flex items-center justify-end`}>
+      <div className={`px-5 ${py} flex items-center justify-end ${
+        absoluteBalance < 0    ? 'bg-[rgba(208,50,56,0.13)]' :
+        absoluteBalance < 500  ? 'bg-[rgba(134,134,133,0.09)]' :
+        absoluteBalance < 1000 ? 'bg-[#e2f6d5]' :
+        'bg-[rgba(159,232,112,0.38)]'
+      }`}>
         {absoluteBalance !== 0 && (
-          <span
-            className={`num font-semibold text-sm ${
-              absoluteBalance > 0 ? 'text-wise-black' :
-              absoluteBalance < 0 ? 'text-wise-danger' :
-              'text-wise-gray'
-            }`}
-          >
+          <span className={`num font-semibold text-sm ${
+            absoluteBalance < 0    ? 'text-wise-danger' :
+            absoluteBalance < 500  ? 'text-wise-gray' :
+            absoluteBalance < 1000 ? 'text-wise-positive' :
+            'text-wise-dark-green'
+          }`}>
             {formatBRL(absoluteBalance)}
           </span>
         )}
