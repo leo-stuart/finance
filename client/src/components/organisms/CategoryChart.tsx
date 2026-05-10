@@ -1,19 +1,36 @@
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recharts'
 import { formatBRL } from '../../utils/finance'
-import type { Transaction, Category } from '../../types/finance'
+import { getInstallmentDueDate } from '../../utils/creditCards'
+import type { Transaction, Category, CreditCardCharge, CreditCard } from '../../types/finance'
 
 interface CategoryChartProps {
   transactions: Transaction[]
   categories: Category[]
+  charges?: CreditCardCharge[]
+  cards?: CreditCard[]
+  year?: number
 }
 
-export function CategoryChart({ transactions, categories }: CategoryChartProps) {
+export function CategoryChart({ transactions, categories, charges = [], cards = [], year }: CategoryChartProps) {
   const expenses = transactions.filter(t => t.type === 'expense')
 
   const byCategory = new Map<string, number>()
   for (const t of expenses) {
     const key = t.category_id ?? '__none__'
     byCategory.set(key, (byCategory.get(key) ?? 0) + t.amount)
+  }
+
+  for (const charge of charges) {
+    const card = cards.find(c => c.id === charge.credit_card_id)
+    if (!card) continue
+    const purchaseDate = new Date(charge.purchase_date + 'T00:00:00')
+    const installmentAmount = charge.amount / charge.installments
+    for (let i = 0; i < charge.installments; i++) {
+      const dueDate = getInstallmentDueDate(purchaseDate, card, i)
+      if (year !== undefined && dueDate.getFullYear() !== year) continue
+      const key = charge.category_id ?? '__none__'
+      byCategory.set(key, (byCategory.get(key) ?? 0) + installmentAmount)
+    }
   }
 
   const data = Array.from(byCategory.entries())

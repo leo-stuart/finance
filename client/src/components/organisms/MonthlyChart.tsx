@@ -3,23 +3,28 @@ import {
   Legend, ResponsiveContainer,
 } from 'recharts'
 import { MONTHS_SHORT_PT, formatBRL } from '../../utils/finance'
-import type { Transaction } from '../../types/finance'
+import type { Transaction, InvoiceOverlay } from '../../types/finance'
 
 interface MonthlyChartProps {
   transactions: Transaction[]
   year: number
+  invoiceOverlays?: InvoiceOverlay[]
 }
 
-export function MonthlyChart({ transactions, year }: MonthlyChartProps) {
+export function MonthlyChart({ transactions, year, invoiceOverlays = [] }: MonthlyChartProps) {
   const data = MONTHS_SHORT_PT.map((name, m) => {
     const monthTxns = transactions.filter(t => {
       const [y, mo] = t.date.split('-').map(Number)
       return y === year && mo - 1 === m
     })
+    const mStr = String(m + 1).padStart(2, '0')
+    const invoiceTotal = invoiceOverlays
+      .filter(o => o.date.startsWith(`${year}-${mStr}-`))
+      .reduce((s, o) => s + o.amount, 0)
     return {
       name,
       Entradas: monthTxns.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0),
-      Saídas: monthTxns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0),
+      Saídas: monthTxns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0) + invoiceTotal,
       Poupança: monthTxns.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0),
     }
   })

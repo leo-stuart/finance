@@ -10,6 +10,9 @@ import { SummaryCards } from '../organisms/SummaryCards'
 import { Spinner } from '../atoms/Spinner'
 import { useTransactions } from '../../hooks/useTransactions'
 import { useCategories } from '../../hooks/useCategories'
+import { useCreditCards } from '../../hooks/useCreditCards'
+import { useAllCreditCardCharges } from '../../hooks/useCreditCardCharges'
+import { computeYearInvoices, getInstallmentDueDate } from '../../utils/creditCards'
 import { MONTHS_SHORT_PT, formatBRL } from '../../utils/finance'
 
 const TOOLTIP_STYLE = {
@@ -24,6 +27,12 @@ export function AnalyticsPage() {
   const [year, setYear] = useState(new Date().getFullYear())
   const { transactions, loading } = useTransactions(year)
   const { categories } = useCategories()
+  const { cards } = useCreditCards()
+  const { charges } = useAllCreditCardCharges()
+  const invoiceOverlays = useMemo(
+    () => computeYearInvoices(charges, cards, year),
+    [charges, cards, year],
+  )
 
   const monthlyData = useMemo(() => {
     let cumulative = 0
@@ -33,15 +42,20 @@ export function AnalyticsPage() {
         return y === year && mo - 1 === m
       })
       const income = monthTxns.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0)
-      const expense = monthTxns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
+      const txnExpense = monthTxns.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0)
       const savings = monthTxns.filter(t => t.type === 'savings').reduce((s, t) => s + t.amount, 0)
+      const mStr = String(m + 1).padStart(2, '0')
+      const invoiceTotal = invoiceOverlays
+        .filter(o => o.date.startsWith(`${year}-${mStr}-`))
+        .reduce((s, o) => s + o.amount, 0)
+      const expense = txnExpense + invoiceTotal
       const net = income - expense - savings
       cumulative += net
       const savingsRate = income > 0 ? (savings / income) * 100 : null
       const hasData = income > 0 || expense > 0 || savings > 0
       return { name, income, expense, savings, net, cumulative, savingsRate, hasData }
     })
-  }, [transactions, year])
+  }, [transactions, invoiceOverlays, year])
 
   const incomeByCategory = useMemo(() => {
     const byCategory = new Map<string, number>()
@@ -64,6 +78,18 @@ export function AnalyticsPage() {
       const key = t.category_id ?? '__none__'
       byCategory.set(key, (byCategory.get(key) ?? 0) + t.amount)
     }
+    for (const charge of charges) {
+      const card = cards.find(c => c.id === charge.credit_card_id)
+      if (!card) continue
+      const purchaseDate = new Date(charge.purchase_date + 'T00:00:00')
+      const installmentAmount = charge.amount / charge.installments
+      for (let i = 0; i < charge.installments; i++) {
+        const dueDate = getInstallmentDueDate(purchaseDate, card, i)
+        if (dueDate.getFullYear() !== year) continue
+        const key = charge.category_id ?? '__none__'
+        byCategory.set(key, (byCategory.get(key) ?? 0) + installmentAmount)
+      }
+    }
     return Array.from(byCategory.entries())
       .map(([key, value]) => {
         const cat = categories.find(c => c.id === key)
@@ -71,7 +97,7 @@ export function AnalyticsPage() {
       })
       .sort((a, b) => b.value - a.value)
       .slice(0, 8)
-  }, [transactions, categories])
+  }, [transactions, charges, cards, categories, year])
 
   const savingsByCategory = useMemo(() => {
     const byCategory = new Map<string, number>()
@@ -127,7 +153,7 @@ export function AnalyticsPage() {
         </div>
       ) : (
         <div className="p-6 flex flex-col gap-6">
-          <SummaryCards transactions={transactions} />
+          <SummaryCards transactions={transactions} invoiceOverlays={invoiceOverlays} />
 
           {/* Net balance + savings rate */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

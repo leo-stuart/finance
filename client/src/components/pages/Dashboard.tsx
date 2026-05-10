@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { SummaryCards } from '../organisms/SummaryCards'
 import { MonthlyChart } from '../organisms/MonthlyChart'
@@ -8,12 +8,21 @@ import { Spinner } from '../atoms/Spinner'
 import { useTransactions } from '../../hooks/useTransactions'
 import { useCategories } from '../../hooks/useCategories'
 import { useSavings } from '../../hooks/useSavings'
+import { useCreditCards } from '../../hooks/useCreditCards'
+import { useAllCreditCardCharges } from '../../hooks/useCreditCardCharges'
+import { computeYearInvoices } from '../../utils/creditCards'
 
 export function Dashboard() {
   const [year, setYear] = useState(new Date().getFullYear())
   const { transactions, loading } = useTransactions(year)
   const { categories } = useCategories()
   const { goals, add: addGoal, remove: removeGoal, update: updateGoal } = useSavings()
+  const { cards } = useCreditCards()
+  const { charges } = useAllCreditCardCharges()
+  const invoiceOverlays = useMemo(
+    () => computeYearInvoices(charges, cards, year),
+    [charges, cards, year],
+  )
 
   return (
     <div className="flex flex-col min-h-full">
@@ -44,14 +53,14 @@ export function Dashboard() {
         </div>
       ) : (
         <div className="p-6 flex flex-col gap-8">
-          <SummaryCards transactions={transactions} />
+          <SummaryCards transactions={transactions} invoiceOverlays={invoiceOverlays} />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2">
-              <MonthlyChart transactions={transactions} year={year} />
+              <MonthlyChart transactions={transactions} year={year} invoiceOverlays={invoiceOverlays} />
             </div>
             <div>
-              <CategoryChart transactions={transactions} categories={categories} />
+              <CategoryChart transactions={transactions} categories={categories} charges={charges} cards={cards} year={year} />
             </div>
           </div>
 
