@@ -168,7 +168,7 @@ export function AnalyticsPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="#e8ebe6" vertical={false} />
                   <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#868685', fontWeight: 600 }} axisLine={false} tickLine={false} />
                   <YAxis tick={{ fontSize: 10, fill: '#868685', fontFamily: 'IBM Plex Mono' }} axisLine={false} tickLine={false} tickFormatter={v => `${v.toFixed(0)}%`} width={36} />
-                  <Tooltip formatter={(v: number | null) => v !== null ? [`${v.toFixed(1)}%`, 'Poupança'] : ['—', 'Poupança']} contentStyle={TOOLTIP_STYLE} />
+                  <Tooltip formatter={(v: number) => [`${v.toFixed(1)}%`, 'Poupança']} contentStyle={TOOLTIP_STYLE} />
                   <ReferenceLine y={20} stroke="#9fe870" strokeDasharray="4 4" />
                   <Line type="monotone" dataKey="savingsRate" stroke="#0369a1" strokeWidth={2} dot={{ r: 3, fill: '#0369a1' }} activeDot={{ r: 5 }} connectNulls={false} />
                 </LineChart>
