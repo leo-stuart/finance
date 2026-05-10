@@ -3,6 +3,7 @@ import { Auth } from './components/pages/Auth'
 import { SpreadsheetView } from './components/pages/SpreadsheetView'
 import { Dashboard } from './components/pages/Dashboard'
 import { CreditCardsPage } from './components/pages/CreditCardsPage'
+import { AnalyticsPage } from './components/pages/AnalyticsPage'
 import { AppLayout } from './components/templates/AppLayout'
 
 export default function App() {
@@ -23,6 +24,11 @@ export default function App() {
         <Route path="/cartoes" element={
           <AppLayout>
             <CreditCardsPage />
+          </AppLayout>
+        } />
+        <Route path="/analytics" element={
+          <AppLayout>
+            <AnalyticsPage />
           </AppLayout>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />
