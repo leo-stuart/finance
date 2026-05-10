@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, Trash2 } from 'lucide-react'
+import { X, Trash2, Pencil } from 'lucide-react'
 import { Button } from '../atoms/Button'
 import { Input } from '../atoms/Input'
 import { FormField } from '../molecules/FormField'
@@ -12,6 +12,7 @@ interface TransactionModalProps {
   dayTransactions: Transaction[]
   categories: Category[]
   onAdd: (t: Omit<Transaction, 'id' | 'user_id' | 'created_at'>) => Promise<{ error: any }>
+  onUpdate: (id: string, t: Partial<Pick<Transaction, 'amount' | 'type' | 'category_id' | 'description'>>) => Promise<{ error: any }>
   onDelete: (id: string) => Promise<{ error: any }>
   onClose: () => void
 }
@@ -34,6 +35,7 @@ export function TransactionModal({
   dayTransactions,
   categories,
   onAdd,
+  onUpdate,
   onDelete,
   onClose,
 }: TransactionModalProps) {
@@ -43,6 +45,25 @@ export function TransactionModal({
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+
+  const startEditing = (t: Transaction) => {
+    setEditingId(t.id)
+    setType(t.type)
+    setAmount(t.amount.toFixed(2).replace('.', ','))
+    setCategoryId(t.category_id ?? '')
+    setDescription(t.description ?? '')
+    setError('')
+  }
+
+  const cancelEditing = () => {
+    setEditingId(null)
+    setType(defaultType)
+    setAmount('')
+    setCategoryId('')
+    setDescription('')
+    setError('')
+  }
 
   const filteredCategories = categories.filter(c => c.type === type)
 
@@ -60,20 +81,32 @@ export function TransactionModal({
       return
     }
     setSaving(true)
-    const { error: err } = await onAdd({
-      date,
-      amount: parsed,
-      type,
-      category_id: categoryId || null,
-      description,
-    })
-    setSaving(false)
-    if (err) setError(err.message)
-    else {
-      setAmount('')
-      setCategoryId('')
-      setDescription('')
-      setError('')
+    if (editingId) {
+      const { error: err } = await onUpdate(editingId, {
+        amount: parsed,
+        type,
+        category_id: categoryId || null,
+        description,
+      })
+      setSaving(false)
+      if (err) setError(err.message)
+      else cancelEditing()
+    } else {
+      const { error: err } = await onAdd({
+        date,
+        amount: parsed,
+        type,
+        category_id: categoryId || null,
+        description,
+      })
+      setSaving(false)
+      if (err) setError(err.message)
+      else {
+        setAmount('')
+        setCategoryId('')
+        setDescription('')
+        setError('')
+      }
     }
   }
 
@@ -108,7 +141,7 @@ export function TransactionModal({
                 {dayTransactions.map(t => {
                   const cat = categories.find(c => c.id === t.category_id)
                   return (
-                    <div key={t.id} className="flex items-center justify-between gap-3 p-3 rounded-[16px] bg-wise-bg">
+                    <div key={t.id} className={`flex items-center justify-between gap-3 p-3 rounded-[16px] transition-colors ${editingId === t.id ? 'bg-wise-mint' : 'bg-wise-bg'}`}>
                       <div className="flex flex-col gap-0.5 min-w-0">
                         <span className={`num font-semibold text-sm ${typeColors[t.type]}`}>
                           {formatBRL(t.amount)}
@@ -119,12 +152,20 @@ export function TransactionModal({
                           {t.description && <span>· {t.description}</span>}
                         </div>
                       </div>
-                      <button
-                        onClick={() => handleDelete(t.id)}
-                        className="text-wise-gray hover:text-wise-danger transition-colors shrink-0"
-                      >
-                        <Trash2 size={14} />
-                      </button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          onClick={() => startEditing(t)}
+                          className="text-wise-gray hover:text-wise-black transition-colors p-1"
+                        >
+                          <Pencil size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(t.id)}
+                          className="text-wise-gray hover:text-wise-danger transition-colors p-1"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                     </div>
                   )
                 })}
@@ -133,7 +174,9 @@ export function TransactionModal({
           )}
 
           <form onSubmit={handleSubmit} className="px-6 py-4 flex flex-col gap-4">
-            <p className="text-xs font-bold text-wise-warm-dark uppercase tracking-wider">Nova transação</p>
+            <p className="text-xs font-bold text-wise-warm-dark uppercase tracking-wider">
+              {editingId ? 'Editar transação' : 'Nova transação'}
+            </p>
 
             <div className="flex gap-2">
               {(['income', 'expense', 'savings'] as const).map(t => (
@@ -196,11 +239,17 @@ export function TransactionModal({
             {error && <p className="text-xs text-wise-danger">{error}</p>}
 
             <div className="flex gap-2 pt-1">
-              <Button type="button" variant="ghost" onClick={onClose} className="flex-1">
-                Cancelar
-              </Button>
+              {editingId ? (
+                <Button type="button" variant="ghost" onClick={cancelEditing} className="flex-1">
+                  Cancelar edição
+                </Button>
+              ) : (
+                <Button type="button" variant="ghost" onClick={onClose} className="flex-1">
+                  Cancelar
+                </Button>
+              )}
               <Button type="submit" disabled={saving} className="flex-1">
-                {saving ? 'Salvando...' : 'Salvar'}
+                {saving ? 'Salvando...' : editingId ? 'Salvar alterações' : 'Salvar'}
               </Button>
             </div>
           </form>

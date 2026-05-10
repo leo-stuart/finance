@@ -14,7 +14,7 @@ export function SpreadsheetView() {
   const currentDate = new Date()
   const [year, setYear] = useState(currentDate.getFullYear())
   const [month, setMonth] = useState(currentDate.getMonth())
-  const { transactions, loading, add, remove } = useTransactions(year)
+  const { transactions, loading, add, update, remove } = useTransactions(year)
   const { categories } = useCategories()
   const { cards } = useCreditCards()
   const { charges } = useAllCreditCardCharges()
@@ -134,6 +134,7 @@ export function SpreadsheetView() {
           dayTransactions={modalDayTransactions}
           categories={categories}
           onAdd={add}
+          onUpdate={update}
           onDelete={remove}
           onClose={() => setModal(null)}
         />
